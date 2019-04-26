@@ -1,31 +1,44 @@
 import socket, ssl, json, struct, sys
+from datetime import datetime
 
 
+## Constants never change
+fcmUrl = 'https://fcm.googleapis.com/fcm/send'
+fcmContentType = 'Content-Type: application/json'
+
+apnsSandBoxHostSSL = ( 'gateway.sandbox.push.apple.com', 2195 )
+apnsProductionHostSSL = ( 'gateway.push.apple.com', 2195)
+
+apnsSandBoxHostTLS = ( 'api.development.push.apple.com', 443 )
+apnsProductionHostTLS = ( 'api.push.apple.com', 443)
+
+def showAllInfo():
+    print '-h to show help'
 
 
 def mainWithArguments():
-	print "au"
+	print 'au'
 
 
 def mainOptionsMenu():
-	print "au"
+	print 'au'
   
 if __name__== "__main__":
 	print "#### Running apnx pusher ####"
-	print "First parameter should be token, path push .pem"
 	print sys.argv[0]
-  	mainWithArguments()
+        showAllInfo()
+        mainWithArguments()
 
 #originally from: http://stackoverflow.com/questions/1052645/apple-pns-push-notification-services-sample-code
 
 # device token returned when the iPhone application
 # registers to receive alerts
 
-deviceToken = '1909913d261daf71453b337df6497ac3a0f2fee16fe5e1a7c5f0b3e93ca317f4'
+deviceToken = '5a72a0d392dd18d09c6bc729e1aec1ed1f62862b1d17d8a2a7a435b81d4d8aa9'
 
 thePayLoad = {
      'aps': {
-          'alert':'OMG! Push\'s works fine!',
+         'alert':'OMG! Push\'s works fine! with date: ' + datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
           'sound':'k1DiveAlarm.caf',
           'badge':42,
           },
@@ -39,31 +52,25 @@ thePayLoad = {
 #
 theCertfile = 'apns-dev-cert.pem'
 # 
-theHost = ( 'gateway.sandbox.push.apple.com', 2195 )
-
-# 
 data = json.dumps( thePayLoad )
 
 # Clear out spaces in the device token and convert to hex
 deviceToken = deviceToken.replace(' ','')
 
 
-
-
 if sys.version_info[0] == 3:
     byteToken = bytes.fromhex( deviceToken ) # Python 3
-    text = input("prompt")  # Python 3
+    text = input("Choose and option:")  # Python 3
 else:
     byteToken = deviceToken.decode('hex') # Python 2
-    text = raw_input("prompt")  # Python 2
+    text = raw_input("Choose and option:")  # Python 2
 
-print text
 theFormat = '!BH32sH%ds' % len(data)
 theNotification = struct.pack( theFormat, 0, 32, byteToken, len(data), data )
 
 # Create our connection using the certfile saved locally
 ssl_sock = ssl.wrap_socket( socket.socket( socket.AF_INET, socket.SOCK_STREAM ), certfile = theCertfile )
-ssl_sock.connect( theHost )
+ssl_sock.connect( apnsSandBoxHostSSL )
 
 # Write out our data
 ssl_sock.write( theNotification )
